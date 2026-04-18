@@ -8,7 +8,9 @@ export function Dashboard() {
   const {
     data,
     isLoading,
-    updateHourlyRate,
+    effectiveRate,
+    updateEstimationRate,
+    resetEstimationRate,
     addFromCatalog,
     addAdHocTask,
     updateEstimationHours,
@@ -20,8 +22,8 @@ export function Dashboard() {
   const [rateInput, setRateInput] = useState('');
 
   useEffect(() => {
-    if (!isLoading) setRateInput(data.hourlyRate > 0 ? String(data.hourlyRate) : '');
-  }, [isLoading, data.hourlyRate]);
+    if (!isLoading) setRateInput(effectiveRate > 0 ? String(effectiveRate) : '');
+  }, [isLoading, effectiveRate]);
 
   useEffect(() => {
     const map: Record<string, string> = {};
@@ -32,14 +34,15 @@ export function Dashboard() {
   if (isLoading) return <div className={styles.loading}>Chargement…</div>;
 
   const totalHours = calculateTotalHours(data.estimation);
-  const totalCost = calculateTotalCost(totalHours, data.hourlyRate);
-  const hasRate = data.hourlyRate > 0;
+  const totalCost = calculateTotalCost(totalHours, effectiveRate);
+  const hasRate = effectiveRate > 0;
+  const isOverriding = data.estimationRate !== undefined;
 
   function handleRateBlur() {
     const parsed = parseFloat(rateInput);
-    if (!isNaN(parsed) && parsed >= 0) updateHourlyRate(parsed);
-    else if (rateInput === '') updateHourlyRate(0);
-    else setRateInput(data.hourlyRate > 0 ? String(data.hourlyRate) : '');
+    if (!isNaN(parsed) && parsed >= 0) updateEstimationRate(parsed);
+    else if (rateInput === '') { resetEstimationRate(); setRateInput(''); }
+    else setRateInput(effectiveRate > 0 ? String(effectiveRate) : '');
   }
 
   function handleHoursChange(id: string, value: string) {
@@ -63,21 +66,32 @@ export function Dashboard() {
         {/* Summary */}
         <div className={styles.summary}>
           <div className={styles.summaryItem}>
-            <label className={styles.label} htmlFor="dashRate">Taux horaire</label>
+            <div className={styles.rateLabel}>
+              <label className={styles.label} htmlFor="dashRate">Taux horaire</label>
+              {isOverriding && (
+                <button
+                  className={styles.resetRateBtn}
+                  onClick={() => { resetEstimationRate(); }}
+                  title={`Revenir au taux de base ($${data.hourlyRate}/h)`}
+                >
+                  ↺ {data.hourlyRate}$/h
+                </button>
+              )}
+            </div>
             <div className={styles.rateWrapper}>
               <span className={styles.rateCurrency}>$</span>
               <input
                 id="dashRate"
-                className={styles.rateInput}
+                className={`${styles.rateInput} ${isOverriding ? styles.rateOverriding : ''}`}
                 type="number"
                 min="0"
                 step="5"
-                placeholder="0"
+                placeholder={String(data.hourlyRate || 0)}
                 value={rateInput}
                 onChange={e => setRateInput(e.target.value)}
                 onBlur={handleRateBlur}
                 onKeyDown={e => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-                aria-label="Taux horaire en dollars canadiens par heure"
+                aria-label="Taux horaire pour cette estimation"
               />
               <span className={styles.rateUnit}>/h</span>
             </div>
