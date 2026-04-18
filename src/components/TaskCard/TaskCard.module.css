@@ -131,8 +131,8 @@
 }
 
 .resetBtn {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   background: #fff;
@@ -157,11 +157,12 @@
   cursor: not-allowed;
 }
 
-/* Toggle switch */
+/* Toggle switch — visual 36×20, touch target 44×44 via padding */
 .toggle {
   width: 36px;
   height: 20px;
   padding: 2px;
+  margin: -12px -4px;
   border: none;
   border-radius: 10px;
   background: #d1d5db;
@@ -170,6 +171,13 @@
   transition: background 0.2s;
   display: flex;
   align-items: center;
+  position: relative;
+}
+
+.toggle::before {
+  content: '';
+  position: absolute;
+  inset: -12px -4px;
 }
 
 .toggle:has(.toggleDot.on) {

@@ -7,9 +7,10 @@ import './App.css';
 export function App() {
   return (
     <HashRouter>
+      <a href="#main-content" className="skip-link">Aller au contenu principal</a>
       <div className="app-shell">
         <Navigation />
-        <main className="app-main">
+        <main id="main-content" className="app-main">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/config" element={<Configuration />} />
