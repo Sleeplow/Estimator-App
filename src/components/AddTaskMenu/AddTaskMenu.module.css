@@ -1,0 +1,271 @@
+.wrapper {
+  position: relative;
+}
+
+/* Trigger button */
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  background: #fff;
+  border: 1.5px dashed #d1d5db;
+  border-radius: 10px;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  min-height: 44px;
+}
+
+.trigger:hover {
+  border-color: #1a56db;
+  color: #1a56db;
+  background: #eff6ff;
+}
+
+.plus {
+  font-size: 1.2rem;
+  line-height: 1;
+  color: inherit;
+}
+
+/* Dropdown menu — z-index 50 per skill scale */
+.menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+  overflow: hidden;
+}
+
+/* Search */
+.searchWrapper {
+  padding: 0.6rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.search {
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #111827;
+  background: #f9fafb;
+  transition: border-color 0.15s;
+}
+
+.search:focus {
+  outline: none;
+  border-color: #1a56db;
+  background: #fff;
+}
+
+/* Catalog list */
+.list {
+  list-style: none;
+  padding: 0.4rem 0;
+  margin: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+  min-height: 44px;
+}
+
+.item:hover {
+  background: #eff6ff;
+}
+
+.itemName {
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.itemHours {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+.empty {
+  padding: 0.75rem 0.85rem;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 0;
+}
+
+/* Ad-hoc trigger */
+.adHocTrigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: #6b7280;
+  text-align: left;
+  transition: background 0.1s, color 0.1s;
+  min-height: 44px;
+}
+
+.adHocTrigger:hover {
+  background: #f9fafb;
+  color: #374151;
+}
+
+.editIcon {
+  font-size: 0.85rem;
+}
+
+/* Ad-hoc form */
+.adHocForm {
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.adHocTitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.adHocInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #111827;
+  transition: border-color 0.15s;
+}
+
+.adHocInput:focus {
+  outline: none;
+  border-color: #1a56db;
+}
+
+.adHocRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hoursWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.adHocHours {
+  width: 80px;
+  padding: 0.5rem 1.8rem 0.5rem 0.6rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+  text-align: right;
+  -moz-appearance: textfield;
+  transition: border-color 0.15s;
+}
+
+.adHocHours::-webkit-inner-spin-button,
+.adHocHours::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.adHocHours:focus {
+  outline: none;
+  border-color: #1a56db;
+}
+
+.hoursUnit {
+  position: absolute;
+  right: 0.5rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.adHocActions {
+  display: flex;
+  gap: 0.4rem;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.cancelBtn {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #6b7280;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cancelBtn:hover {
+  background: #f3f4f6;
+}
+
+.confirmBtn {
+  padding: 0 1rem;
+  min-height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: #1a56db;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.confirmBtn:hover:not(:disabled) {
+  background: #1e429f;
+}
+
+.confirmBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

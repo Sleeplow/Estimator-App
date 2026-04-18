@@ -1,17 +1,11 @@
-import { TaskCategory } from '../types';
+import { EstimationTask } from '../types';
 
-export function calculateTotalHours(categories: TaskCategory[]): number {
-  return categories
-    .filter(c => c.enabled)
-    .reduce((sum, c) => sum + c.currentHours, 0);
+export function calculateTotalHours(tasks: EstimationTask[]): number {
+  return tasks.reduce((sum, t) => sum + t.hours, 0);
 }
 
 export function calculateTotalCost(totalHours: number, hourlyRate: number): number {
   return totalHours * hourlyRate;
-}
-
-export function calculateTaskCost(task: TaskCategory, hourlyRate: number): number {
-  return task.enabled ? task.currentHours * hourlyRate : 0;
 }
 
 export function formatCurrency(amount: number): string {
@@ -21,8 +15,4 @@ export function formatCurrency(amount: number): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
-}
-
-export function formatHours(hours: number): string {
-  return `${hours}h`;
 }
