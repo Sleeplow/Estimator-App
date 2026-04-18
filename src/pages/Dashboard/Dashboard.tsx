@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useAppData } from '../../hooks/useLocalStorage';
 import { AddTaskMenu } from '../../components/AddTaskMenu/AddTaskMenu';
 import { calculateTotalHours, calculateTotalCost, formatCurrency } from '../../utils/calculations';
@@ -9,6 +8,7 @@ export function Dashboard() {
   const {
     data,
     isLoading,
+    updateHourlyRate,
     addFromCatalog,
     addAdHocTask,
     updateEstimationHours,
@@ -17,8 +17,12 @@ export function Dashboard() {
   } = useAppData();
 
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
+  const [rateInput, setRateInput] = useState('');
 
-  // Sync input values when estimation changes externally
+  useEffect(() => {
+    if (!isLoading) setRateInput(data.hourlyRate > 0 ? String(data.hourlyRate) : '');
+  }, [isLoading, data.hourlyRate]);
+
   useEffect(() => {
     const map: Record<string, string> = {};
     data.estimation.forEach(t => { map[t.id] = String(t.hours); });
@@ -30,6 +34,13 @@ export function Dashboard() {
   const totalHours = calculateTotalHours(data.estimation);
   const totalCost = calculateTotalCost(totalHours, data.hourlyRate);
   const hasRate = data.hourlyRate > 0;
+
+  function handleRateBlur() {
+    const parsed = parseFloat(rateInput);
+    if (!isNaN(parsed) && parsed >= 0) updateHourlyRate(parsed);
+    else if (rateInput === '') updateHourlyRate(0);
+    else setRateInput(data.hourlyRate > 0 ? String(data.hourlyRate) : '');
+  }
 
   function handleHoursChange(id: string, value: string) {
     setInputValues(prev => ({ ...prev, [id]: value }));
@@ -52,12 +63,24 @@ export function Dashboard() {
         {/* Summary */}
         <div className={styles.summary}>
           <div className={styles.summaryItem}>
-            <span className={styles.label}>Taux horaire</span>
-            <span className={styles.value}>
-              {hasRate
-                ? `${formatCurrency(data.hourlyRate)}/h`
-                : <Link to="/config" className={styles.configLink}>Configurer →</Link>}
-            </span>
+            <label className={styles.label} htmlFor="dashRate">Taux horaire</label>
+            <div className={styles.rateWrapper}>
+              <span className={styles.rateCurrency}>$</span>
+              <input
+                id="dashRate"
+                className={styles.rateInput}
+                type="number"
+                min="0"
+                step="5"
+                placeholder="0"
+                value={rateInput}
+                onChange={e => setRateInput(e.target.value)}
+                onBlur={handleRateBlur}
+                onKeyDown={e => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+                aria-label="Taux horaire en dollars canadiens par heure"
+              />
+              <span className={styles.rateUnit}>/h</span>
+            </div>
           </div>
           <div className={styles.divider} />
           <div className={styles.summaryItem}>
@@ -149,13 +172,6 @@ export function Dashboard() {
             onAddAdHoc={addAdHocTask}
           />
         </section>
-
-        {!hasRate && data.estimation.length > 0 && (
-          <p className={styles.hint}>
-            <Link to="/config" className={styles.configLink}>Configurez votre taux horaire</Link>{' '}
-            pour voir le coût estimé.
-          </p>
-        )}
       </div>
     </div>
   );
