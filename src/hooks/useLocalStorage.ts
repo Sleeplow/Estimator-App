@@ -81,10 +81,23 @@ export function useAppData() {
     setData(next);
   }
 
-  // ── Hourly rate ──────────────────────────────────────────
+  // ── Hourly rate (base — Config page) ────────────────────
   function updateHourlyRate(rate: number) {
     persist({ ...data, hourlyRate: Math.max(0, rate) });
   }
+
+  // ── Estimation rate override (Dashboard only) ────────────
+  function updateEstimationRate(rate: number) {
+    persist({ ...data, estimationRate: Math.max(0, rate) });
+  }
+
+  function resetEstimationRate() {
+    const next = { ...data };
+    delete next.estimationRate;
+    persist(next);
+  }
+
+  const effectiveRate = data.estimationRate ?? data.hourlyRate;
 
   // ── Catalog ──────────────────────────────────────────────
   function addCatalogTask(name: string, defaultHours: number) {
@@ -142,7 +155,10 @@ export function useAppData() {
   return {
     data,
     isLoading,
+    effectiveRate,
     updateHourlyRate,
+    updateEstimationRate,
+    resetEstimationRate,
     addCatalogTask,
     updateCatalogTask,
     deleteCatalogTask,

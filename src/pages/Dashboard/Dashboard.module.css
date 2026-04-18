@@ -56,6 +56,32 @@
   font-size: 1.55rem;
 }
 
+/* Rate label row with optional reset button */
+.rateLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.resetRateBtn {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #f59e0b;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  min-height: 22px;
+}
+
+.resetRateBtn:hover {
+  background: #fef3c7;
+}
+
 /* Inline rate input in summary card */
 .rateWrapper {
   position: relative;
@@ -106,6 +132,12 @@
   color: #d1d5db;
   font-weight: 400;
   font-size: 1.1rem;
+}
+
+.rateOverriding {
+  color: #d97706;
+  border-color: #fcd34d !important;
+  background: #fffbeb !important;
 }
 
 .rateUnit {

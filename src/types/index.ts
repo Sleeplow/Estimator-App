@@ -13,7 +13,8 @@ export interface EstimationTask {
 
 export interface AppData {
   version: number;
-  hourlyRate: number;
+  hourlyRate: number;          // base rate — set in Config, never touched by estimation
+  estimationRate?: number;     // override for current estimation only (undefined = use base)
   catalog: CatalogTask[];
   estimation: EstimationTask[];
 }
