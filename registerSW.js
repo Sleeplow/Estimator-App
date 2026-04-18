@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/Estimator-App/sw.js', { scope: '/Estimator-App/' })})}
