@@ -23,6 +23,14 @@ export function Navigation() {
           Estimation
         </NavLink>
         <NavLink
+          to="/history"
+          className={({ isActive }) =>
+            `${styles.link} ${isActive ? styles.active : ''}`
+          }
+        >
+          Historique
+        </NavLink>
+        <NavLink
           to="/config"
           className={({ isActive }) =>
             `${styles.link} ${isActive ? styles.active : ''}`

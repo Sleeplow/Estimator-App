@@ -1,63 +1,100 @@
 import { useState, useEffect } from 'react';
-import { AppData, CatalogTask, EstimationTask, DEFAULT_CATALOG, CURRENT_VERSION } from '../types';
+import {
+  AppData, CatalogTask, EstimationTask, SavedEstimation, CurrentEstimationMeta,
+  DEFAULT_CATALOG, CURRENT_VERSION,
+} from '../types';
 
 const STORAGE_KEY = 'powerbi-estimator';
+
+const defaultMeta: CurrentEstimationMeta = { title: '', client: '', description: '' };
 
 const defaultData: AppData = {
   version: CURRENT_VERSION,
   hourlyRate: 0,
   catalog: DEFAULT_CATALOG,
   estimation: [],
+  currentEstimation: defaultMeta,
+  estimationHistory: [],
 };
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+function parseCatalog(arr: unknown): CatalogTask[] {
+  if (!Array.isArray(arr)) return DEFAULT_CATALOG;
+  return (arr as Record<string, unknown>[]).map(c => ({
+    id: String(c.id ?? generateId()),
+    name: String(c.name ?? ''),
+    defaultHours: Number(c.defaultHours ?? 0),
+  }));
+}
+
+function parseEstimation(arr: unknown): EstimationTask[] {
+  if (!Array.isArray(arr)) return [];
+  return (arr as Record<string, unknown>[]).map(e => ({
+    id: String(e.id ?? generateId()),
+    catalogId: e.catalogId ? String(e.catalogId) : undefined,
+    name: String(e.name ?? ''),
+    hours: Number(e.hours ?? 0),
+  }));
+}
+
+function parseMeta(obj: unknown): CurrentEstimationMeta {
+  if (!obj || typeof obj !== 'object') return defaultMeta;
+  const m = obj as Record<string, unknown>;
+  return {
+    id: m.id ? String(m.id) : undefined,
+    title: String(m.title ?? ''),
+    client: String(m.client ?? ''),
+    description: String(m.description ?? ''),
+  };
+}
+
+function parseHistory(arr: unknown): SavedEstimation[] {
+  if (!Array.isArray(arr)) return [];
+  return (arr as Record<string, unknown>[]).map(e => ({
+    id: String(e.id ?? generateId()),
+    title: String(e.title ?? ''),
+    client: String(e.client ?? ''),
+    description: String(e.description ?? ''),
+    createdAt: String(e.createdAt ?? new Date().toISOString()),
+    updatedAt: String(e.updatedAt ?? new Date().toISOString()),
+    hourlyRate: Number(e.hourlyRate ?? 0),
+    tasks: parseEstimation(e.tasks),
+  }));
+}
+
 function migrateData(raw: unknown): AppData {
   if (!raw || typeof raw !== 'object') return defaultData;
   const stored = raw as Record<string, unknown>;
+  const version = Number(stored.version ?? 0);
 
-  // v1 → v2: taskCategories split into catalog + estimation
-  if (!stored.version || Number(stored.version) < 2) {
+  // v1 → catalog split
+  if (version < 2) {
     const oldCats = Array.isArray(stored.taskCategories) ? stored.taskCategories : [];
     const catalog: CatalogTask[] = oldCats.length > 0
-      ? oldCats.map((c: Record<string, unknown>) => ({
+      ? (oldCats as Record<string, unknown>[]).map(c => ({
           id: String(c.id ?? generateId()),
           name: String(c.name ?? ''),
           defaultHours: Number(c.defaultHours ?? 0),
         }))
       : DEFAULT_CATALOG;
     return {
-      version: CURRENT_VERSION,
+      ...defaultData,
       hourlyRate: Math.max(0, Number(stored.hourlyRate ?? 0)),
       catalog,
-      estimation: [],
     };
   }
-
-  const catalog = Array.isArray(stored.catalog)
-    ? (stored.catalog as Record<string, unknown>[]).map(c => ({
-        id: String(c.id),
-        name: String(c.name),
-        defaultHours: Number(c.defaultHours),
-      }))
-    : DEFAULT_CATALOG;
-
-  const estimation = Array.isArray(stored.estimation)
-    ? (stored.estimation as Record<string, unknown>[]).map(e => ({
-        id: String(e.id),
-        catalogId: e.catalogId ? String(e.catalogId) : undefined,
-        name: String(e.name),
-        hours: Number(e.hours),
-      }))
-    : [];
 
   return {
     version: CURRENT_VERSION,
     hourlyRate: Math.max(0, Number(stored.hourlyRate ?? 0)),
-    catalog,
-    estimation,
+    estimationRate: stored.estimationRate !== undefined ? Number(stored.estimationRate) : undefined,
+    catalog: parseCatalog(stored.catalog),
+    estimation: parseEstimation(stored.estimation),
+    currentEstimation: parseMeta(stored.currentEstimation),
+    estimationHistory: parseHistory(stored.estimationHistory),
   };
 }
 
@@ -81,6 +118,8 @@ export function useAppData() {
     setData(next);
   }
 
+  const effectiveRate = data.estimationRate ?? data.hourlyRate;
+
   // ── Hourly rate (base — Config page) ────────────────────
   function updateHourlyRate(rate: number) {
     persist({ ...data, hourlyRate: Math.max(0, rate) });
@@ -97,8 +136,6 @@ export function useAppData() {
     persist(next);
   }
 
-  const effectiveRate = data.estimationRate ?? data.hourlyRate;
-
   // ── Catalog ──────────────────────────────────────────────
   function addCatalogTask(name: string, defaultHours: number) {
     const task: CatalogTask = { id: generateId(), name: name.trim(), defaultHours: Math.max(0, defaultHours) };
@@ -112,12 +149,11 @@ export function useAppData() {
 
   function deleteCatalogTask(id: string) {
     const catalog = data.catalog.filter(t => t.id !== id);
-    // Remove from estimation too if added from this catalog entry
     const estimation = data.estimation.filter(e => e.catalogId !== id);
     persist({ ...data, catalog, estimation });
   }
 
-  // ── Estimation ───────────────────────────────────────────
+  // ── Estimation tasks ─────────────────────────────────────
   function addFromCatalog(catalogTask: CatalogTask) {
     const task: EstimationTask = {
       id: generateId(),
@@ -152,6 +188,87 @@ export function useAppData() {
     persist({ ...data, estimation: [] });
   }
 
+  // ── Current estimation meta ──────────────────────────────
+  function updateCurrentMeta(updates: Partial<CurrentEstimationMeta>) {
+    persist({ ...data, currentEstimation: { ...data.currentEstimation, ...updates } });
+  }
+
+  // ── History ──────────────────────────────────────────────
+  function saveEstimation() {
+    const now = new Date().toISOString();
+    const title = data.currentEstimation.title.trim() || 'Sans titre';
+    const existingId = data.currentEstimation.id;
+
+    if (existingId && data.estimationHistory.find(e => e.id === existingId)) {
+      const history = data.estimationHistory.map(e =>
+        e.id === existingId
+          ? {
+              ...e,
+              title,
+              client: data.currentEstimation.client,
+              description: data.currentEstimation.description,
+              updatedAt: now,
+              hourlyRate: effectiveRate,
+              tasks: [...data.estimation],
+            }
+          : e
+      );
+      persist({ ...data, estimationHistory: history });
+    } else {
+      const id = generateId();
+      const saved: SavedEstimation = {
+        id,
+        title,
+        client: data.currentEstimation.client,
+        description: data.currentEstimation.description,
+        createdAt: now,
+        updatedAt: now,
+        hourlyRate: effectiveRate,
+        tasks: [...data.estimation],
+      };
+      persist({
+        ...data,
+        currentEstimation: { ...data.currentEstimation, id },
+        estimationHistory: [saved, ...data.estimationHistory],
+      });
+    }
+  }
+
+  function loadEstimation(id: string) {
+    const saved = data.estimationHistory.find(e => e.id === id);
+    if (!saved) return;
+    persist({
+      ...data,
+      estimation: saved.tasks,
+      estimationRate: saved.hourlyRate !== data.hourlyRate ? saved.hourlyRate : undefined,
+      currentEstimation: {
+        id: saved.id,
+        title: saved.title,
+        client: saved.client,
+        description: saved.description,
+      },
+    });
+  }
+
+  function deleteEstimation(id: string) {
+    const history = data.estimationHistory.filter(e => e.id !== id);
+    const currentEstimation =
+      data.currentEstimation.id === id
+        ? { ...data.currentEstimation, id: undefined }
+        : data.currentEstimation;
+    persist({ ...data, estimationHistory: history, currentEstimation });
+  }
+
+  function newEstimation() {
+    const next = { ...data };
+    delete next.estimationRate;
+    persist({
+      ...next,
+      estimation: [],
+      currentEstimation: { title: '', client: '', description: '' },
+    });
+  }
+
   return {
     data,
     isLoading,
@@ -167,5 +284,10 @@ export function useAppData() {
     updateEstimationHours,
     removeEstimationTask,
     clearEstimation,
+    updateCurrentMeta,
+    saveEstimation,
+    loadEstimation,
+    deleteEstimation,
+    newEstimation,
   };
 }

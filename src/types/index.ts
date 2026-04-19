@@ -11,15 +11,35 @@ export interface EstimationTask {
   hours: number;
 }
 
-export interface AppData {
-  version: number;
-  hourlyRate: number;          // base rate — set in Config, never touched by estimation
-  estimationRate?: number;     // override for current estimation only (undefined = use base)
-  catalog: CatalogTask[];
-  estimation: EstimationTask[];
+export interface SavedEstimation {
+  id: string;
+  title: string;
+  client: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  hourlyRate: number;
+  tasks: EstimationTask[];
 }
 
-export const CURRENT_VERSION = 2;
+export interface CurrentEstimationMeta {
+  id?: string;
+  title: string;
+  client: string;
+  description: string;
+}
+
+export interface AppData {
+  version: number;
+  hourlyRate: number;
+  estimationRate?: number;
+  catalog: CatalogTask[];
+  estimation: EstimationTask[];
+  currentEstimation: CurrentEstimationMeta;
+  estimationHistory: SavedEstimation[];
+}
+
+export const CURRENT_VERSION = 3;
 
 export const DEFAULT_CATALOG: CatalogTask[] = [
   { id: '1', name: 'Analyse & Découverte', defaultHours: 8 },

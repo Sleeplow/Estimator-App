@@ -16,10 +16,14 @@ export function Dashboard() {
     updateEstimationHours,
     removeEstimationTask,
     clearEstimation,
+    updateCurrentMeta,
+    saveEstimation,
+    newEstimation,
   } = useAppData();
 
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
   const [rateInput, setRateInput] = useState('');
+  const [savedFeedback, setSavedFeedback] = useState(false);
 
   useEffect(() => {
     if (!isLoading) setRateInput(effectiveRate > 0 ? String(effectiveRate) : '');
@@ -37,6 +41,7 @@ export function Dashboard() {
   const totalCost = calculateTotalCost(totalHours, effectiveRate);
   const hasRate = effectiveRate > 0;
   const isOverriding = data.estimationRate !== undefined;
+  const isSaved = Boolean(data.currentEstimation.id);
 
   function handleRateBlur() {
     const parsed = parseFloat(rateInput);
@@ -59,9 +64,63 @@ export function Dashboard() {
     }
   }
 
+  function handleSave() {
+    saveEstimation();
+    setSavedFeedback(true);
+    setTimeout(() => setSavedFeedback(false), 2000);
+  }
+
+  function handleNew() {
+    if (data.estimation.length > 0 && !confirm('Commencer une nouvelle estimation ? Les tâches non sauvegardées seront perdues.')) return;
+    newEstimation();
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
+
+        {/* Estimation meta */}
+        <div className={styles.metaCard}>
+          <div className={styles.metaTop}>
+            <input
+              className={styles.titleInput}
+              type="text"
+              placeholder="Titre de l'estimation"
+              value={data.currentEstimation.title}
+              onChange={e => updateCurrentMeta({ title: e.target.value })}
+              aria-label="Titre de l'estimation"
+            />
+            <div className={styles.metaActions}>
+              <button className={styles.newBtn} onClick={handleNew} title="Nouvelle estimation">
+                + Nouvelle
+              </button>
+              <button
+                className={`${styles.saveBtn} ${savedFeedback ? styles.savedFeedback : ''}`}
+                onClick={handleSave}
+              >
+                {savedFeedback ? 'Sauvegardé ✓' : isSaved ? 'Mettre à jour' : 'Sauvegarder'}
+              </button>
+            </div>
+          </div>
+          <div className={styles.metaFields}>
+            <input
+              className={styles.metaInput}
+              type="text"
+              placeholder="Client"
+              value={data.currentEstimation.client}
+              onChange={e => updateCurrentMeta({ client: e.target.value })}
+              aria-label="Nom du client"
+            />
+            <input
+              className={`${styles.metaInput} ${styles.metaDescription}`}
+              type="text"
+              placeholder="Description (optionnel)"
+              value={data.currentEstimation.description}
+              onChange={e => updateCurrentMeta({ description: e.target.value })}
+              aria-label="Description de l'estimation"
+            />
+          </div>
+        </div>
 
         {/* Summary */}
         <div className={styles.summary}>
@@ -139,7 +198,12 @@ export function Dashboard() {
           ) : (
             <ul className={styles.taskList}>
               {data.estimation.map(task => {
-                const taskCost = hasRate ? task.hours * data.hourlyRate : null;
+                const catalogTask = task.catalogId
+                  ? data.catalog.find(c => c.id === task.catalogId)
+                  : undefined;
+                const isHoursModified = catalogTask !== undefined && task.hours !== catalogTask.defaultHours;
+                const taskCost = hasRate ? task.hours * effectiveRate : null;
+
                 return (
                   <li key={task.id} className={styles.taskRow}>
                     <div className={styles.taskInfo}>
@@ -152,9 +216,18 @@ export function Dashboard() {
                       {taskCost !== null && (
                         <span className={styles.taskCost}>{formatCurrency(taskCost)}</span>
                       )}
+                      {isHoursModified && catalogTask && (
+                        <button
+                          className={styles.resetHoursBtn}
+                          onClick={() => updateEstimationHours(task.id, catalogTask.defaultHours)}
+                          title={`Revenir aux heures par défaut (${catalogTask.defaultHours}h)`}
+                        >
+                          ↺ {catalogTask.defaultHours}h
+                        </button>
+                      )}
                       <div className={styles.hoursWrapper}>
                         <input
-                          className={styles.hoursInput}
+                          className={`${styles.hoursInput} ${isHoursModified ? styles.hoursModified : ''}`}
                           type="number"
                           min="0"
                           step="0.5"

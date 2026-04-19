@@ -16,6 +16,125 @@
   color: #6b7280;
 }
 
+/* Estimation meta card */
+.metaCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+}
+
+.metaTop {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.titleInput {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  min-width: 0;
+}
+
+.titleInput::placeholder {
+  color: #d1d5db;
+  font-weight: 500;
+}
+
+.titleInput:focus {
+  color: #111827;
+}
+
+.metaActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.newBtn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  min-height: 36px;
+}
+
+.newBtn:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.saveBtn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  background: #1a56db;
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  min-height: 36px;
+}
+
+.saveBtn:hover {
+  background: #1648c0;
+}
+
+.savedFeedback {
+  background: #059669 !important;
+}
+
+.metaFields {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.metaInput {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  background: #f9fafb;
+  transition: border-color 0.15s;
+  min-width: 0;
+}
+
+.metaInput::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.metaInput:focus {
+  outline: none;
+  border-color: #1a56db;
+  background: #fff;
+}
+
+.metaDescription {
+  flex: 2;
+}
+
 /* Summary card */
 .summary {
   background: #fff;
@@ -301,6 +420,26 @@
   text-align: right;
 }
 
+/* Reset hours button (shows when hours differ from catalog default) */
+.resetHoursBtn {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #d97706;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  min-height: 22px;
+  flex-shrink: 0;
+}
+
+.resetHoursBtn:hover {
+  background: #fef3c7;
+}
+
 /* Hours input */
 .hoursWrapper {
   position: relative;
@@ -331,6 +470,12 @@
   outline: none;
   border-color: #1a56db;
   background: #fff;
+}
+
+.hoursModified {
+  color: #d97706;
+  border-color: #fcd34d !important;
+  background: #fffbeb !important;
 }
 
 .hoursUnit {

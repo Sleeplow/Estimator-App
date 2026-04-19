@@ -2,6 +2,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import { Navigation } from './components/Navigation/Navigation';
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { Configuration } from './pages/Configuration/Configuration';
+import { History } from './pages/History/History';
 import './App.css';
 
 export function App() {
@@ -13,6 +14,7 @@ export function App() {
         <main id="main-content" className="app-main">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/history" element={<History />} />
             <Route path="/config" element={<Configuration />} />
           </Routes>
         </main>
