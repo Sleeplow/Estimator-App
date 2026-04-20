@@ -5,13 +5,17 @@ import styles from './AuthButton.module.css';
 export function AuthButton() {
   const { user, isAuthLoading, syncStatus, signInWithGoogle, signOut } = useAuth();
   const [isPending, setIsPending] = useState(false);
+  const [popupBlocked, setPopupBlocked] = useState(false);
 
   async function handleSignIn() {
     setIsPending(true);
+    setPopupBlocked(false);
     try {
       await signInWithGoogle();
-    } catch {
-      // user cancelled popup or network error — silently ignore
+    } catch (err) {
+      const code = (err as { code?: string }).code;
+      if (code === 'auth/popup-blocked') setPopupBlocked(true);
+      // user cancelled or network error — silently ignore other cases
     } finally {
       setIsPending(false);
     }
@@ -32,12 +36,18 @@ export function AuthButton() {
 
   if (!user) {
     return (
-      <button
-        className={styles.signInBtn}
-        onClick={handleSignIn}
-        disabled={isPending}
-        aria-label="Se connecter avec Google"
-      >
+      <>
+        {popupBlocked && (
+          <span className={styles.popupWarning} role="alert">
+            Autorisez les popups
+          </span>
+        )}
+        <button
+          className={styles.signInBtn}
+          onClick={handleSignIn}
+          disabled={isPending}
+          aria-label="Se connecter avec Google"
+        >
         {/* Google G logo */}
         <svg className={styles.googleIcon} viewBox="0 0 24 24" aria-hidden="true">
           <path
@@ -57,8 +67,9 @@ export function AuthButton() {
             fill="#EA4335"
           />
         </svg>
-        <span>{isPending ? 'Connexion…' : 'Se connecter'}</span>
-      </button>
+          <span>{isPending ? 'Connexion…' : 'Se connecter'}</span>
+        </button>
+      </>
     );
   }
 

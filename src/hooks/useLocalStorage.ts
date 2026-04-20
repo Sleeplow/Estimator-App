@@ -155,7 +155,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     loadFromFirestore(user.uid)
       .then((cloudData) => {
         setData((local) => {
-          const merged = cloudData ? mergeAppData(local, cloudData) : local;
+          const merged = cloudData ? mergeAppData(local, migrateData(cloudData)) : local;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
           if (!cloudData) {
             // First login: bootstrap cloud with local data

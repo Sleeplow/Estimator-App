@@ -41,6 +41,12 @@
   cursor: not-allowed;
 }
 
+.popupWarning {
+  font-size: 0.75rem;
+  color: #fde68a;
+  white-space: nowrap;
+}
+
 .googleIcon {
   width: 16px;
   height: 16px;
