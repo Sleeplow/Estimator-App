@@ -61,3 +61,10 @@ body {
 .app-main {
   flex: 1;
 }
+
+/* On mobile, leave room for the bottom tab bar */
+@media (max-width: 600px) {
+  .app-main {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  }
+}

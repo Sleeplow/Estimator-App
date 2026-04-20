@@ -1,9 +1,10 @@
+/* ── Top navigation bar ─────────────────────────────── */
 .nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 1.5rem;
-  height: 60px;
+  height: 56px;
   background: #1a56db;
   color: #fff;
   box-shadow: 0 2px 8px rgba(26, 86, 219, 0.3);
@@ -19,20 +20,21 @@
 }
 
 .logo {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   color: #fff;
   flex-shrink: 0;
 }
 
 .brandName {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
 
-.links {
+/* Desktop links — hidden on mobile */
+.desktopLinks {
   display: flex;
   gap: 0.25rem;
 }
@@ -45,6 +47,7 @@
   font-size: 0.95rem;
   font-weight: 500;
   transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
 }
 
 .link:hover {
@@ -56,4 +59,66 @@
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
   font-weight: 600;
+}
+
+/* ── Mobile bottom tab bar ──────────────────────────── */
+.bottomNav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.tabItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  flex: 1;
+  height: 100%;
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.15s;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabItem:hover {
+  color: #6b7280;
+}
+
+.tabActive {
+  color: #1a56db !important;
+}
+
+.tabIcon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.tabLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 600px) {
+  .desktopLinks {
+    display: none;
+  }
+
+  .bottomNav {
+    display: flex;
+    align-items: stretch;
+  }
 }
