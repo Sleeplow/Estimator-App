@@ -40,6 +40,9 @@
 }
 
 .link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   padding: 0.45rem 1rem;
   border-radius: 6px;
   color: rgba(255, 255, 255, 0.8);
@@ -48,6 +51,13 @@
   font-weight: 500;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
+}
+
+.linkIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.85;
 }
 
 .link:hover {
