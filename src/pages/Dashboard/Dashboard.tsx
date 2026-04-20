@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAppData } from '../../hooks/useLocalStorage';
 import { AddTaskMenu } from '../../components/AddTaskMenu/AddTaskMenu';
 import { calculateTotalHours, calculateTotalCost, formatCurrency } from '../../utils/calculations';
@@ -18,12 +18,13 @@ export function Dashboard() {
     clearEstimation,
     updateCurrentMeta,
     saveEstimation,
+    deleteAndClearEstimation,
     newEstimation,
   } = useAppData();
 
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
   const [rateInput, setRateInput] = useState('');
-  const [savedFeedback, setSavedFeedback] = useState(false);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (!isLoading) setRateInput(effectiveRate > 0 ? String(effectiveRate) : '');
@@ -34,6 +35,21 @@ export function Dashboard() {
     data.estimation.forEach(t => { map[t.id] = String(t.hours); });
     setInputValues(map);
   }, [data.estimation]);
+
+  // Auto-save when estimation already has an ID and content changes
+  useEffect(() => {
+    if (isLoading || !data.currentEstimation.id) return;
+    clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(saveEstimation, 800);
+    return () => clearTimeout(autoSaveTimer.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    data.estimation,
+    data.estimationRate,
+    data.currentEstimation.title,
+    data.currentEstimation.client,
+    data.currentEstimation.description,
+  ]);
 
   if (isLoading) return <div className={styles.loading}>Chargement…</div>;
 
@@ -64,44 +80,62 @@ export function Dashboard() {
     }
   }
 
-  function handleSave() {
-    saveEstimation();
-    setSavedFeedback(true);
-    setTimeout(() => setSavedFeedback(false), 2000);
-  }
-
   function handleNew() {
     if (data.estimation.length > 0 && !confirm('Commencer une nouvelle estimation ? Les tâches non sauvegardées seront perdues.')) return;
     newEstimation();
+  }
+
+  function handleDelete() {
+    if (!data.currentEstimation.id) return;
+    if (!confirm('Supprimer cette estimation de l\'historique ?')) return;
+    deleteAndClearEstimation(data.currentEstimation.id);
   }
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
 
+        {/* Action card — Nouvelle estimation + Enregistrer/Supprimer */}
+        <div className={styles.actionCard}>
+          <button className={styles.newEstimBtn} onClick={handleNew}>
+            <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Nouvelle estimation
+          </button>
+          {isSaved ? (
+            <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={handleDelete} aria-label="Supprimer cette estimation">
+              <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+              </svg>
+              Supprimer
+            </button>
+          ) : (
+            <button className={`${styles.actionBtn} ${styles.saveBtn}`} onClick={saveEstimation} aria-label="Enregistrer cette estimation">
+              <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 7 13 7 21" />
+                <polyline points="7 3 7 8 15 8" />
+              </svg>
+              Enregistrer
+            </button>
+          )}
+        </div>
+
         {/* Estimation meta */}
         <div className={styles.metaCard}>
-          <div className={styles.metaTop}>
-            <input
-              className={styles.titleInput}
-              type="text"
-              placeholder="Titre de l'estimation"
-              value={data.currentEstimation.title}
-              onChange={e => updateCurrentMeta({ title: e.target.value })}
-              aria-label="Titre de l'estimation"
-            />
-            <div className={styles.metaActions}>
-              <button className={styles.newBtn} onClick={handleNew} title="Nouvelle estimation">
-                + Nouvelle
-              </button>
-              <button
-                className={`${styles.saveBtn} ${savedFeedback ? styles.savedFeedback : ''}`}
-                onClick={handleSave}
-              >
-                {savedFeedback ? 'Sauvegardé ✓' : isSaved ? 'Mettre à jour' : 'Sauvegarder'}
-              </button>
-            </div>
-          </div>
+          <input
+            className={styles.titleInput}
+            type="text"
+            placeholder="Titre de l'estimation"
+            value={data.currentEstimation.title}
+            onChange={e => updateCurrentMeta({ title: e.target.value })}
+            aria-label="Titre de l'estimation"
+          />
           <div className={styles.metaFields}>
             <input
               className={styles.metaInput}
@@ -130,7 +164,7 @@ export function Dashboard() {
               {isOverriding && (
                 <button
                   className={styles.resetRateBtn}
-                  onClick={() => { resetEstimationRate(); }}
+                  onClick={resetEstimationRate}
                   title={`Revenir au taux de base ($${data.hourlyRate}/h)`}
                 >
                   ↺ {data.hourlyRate}$/h

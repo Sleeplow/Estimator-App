@@ -259,6 +259,18 @@ export function useAppData() {
     persist({ ...data, estimationHistory: history, currentEstimation });
   }
 
+  function deleteAndClearEstimation(id: string) {
+    const history = data.estimationHistory.filter(e => e.id !== id);
+    const next = { ...data };
+    delete next.estimationRate;
+    persist({
+      ...next,
+      estimationHistory: history,
+      estimation: [],
+      currentEstimation: { title: '', client: '', description: '' },
+    });
+  }
+
   function newEstimation() {
     const next = { ...data };
     delete next.estimationRate;
@@ -288,6 +300,7 @@ export function useAppData() {
     saveEstimation,
     loadEstimation,
     deleteEstimation,
+    deleteAndClearEstimation,
     newEstimation,
   };
 }

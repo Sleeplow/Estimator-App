@@ -16,7 +16,81 @@
   color: #6b7280;
 }
 
-/* Estimation meta card */
+/* ── Action card (Nouvelle estimation + Enregistrer/Supprimer) ── */
+.actionCard {
+  display: flex;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 0.75rem;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+}
+
+.newEstimBtn {
+  flex: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  height: 48px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  background: #f3f4f6;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.newEstimBtn:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.actionBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 48px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.saveBtn {
+  background: #059669;
+}
+
+.saveBtn:hover {
+  background: #047857;
+}
+
+.deleteBtn {
+  background: #dc2626;
+}
+
+.deleteBtn:hover {
+  background: #b91c1c;
+}
+
+.btnIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ── Estimation meta card ───────────────────────────── */
 .metaCard {
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -28,14 +102,7 @@
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
 }
 
-.metaTop {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
 .titleInput {
-  flex: 1;
   font-size: 1.1rem;
   font-weight: 700;
   color: #111827;
@@ -43,63 +110,12 @@
   outline: none;
   background: transparent;
   padding: 0;
-  min-width: 0;
+  width: 100%;
 }
 
 .titleInput::placeholder {
   color: #d1d5db;
   font-weight: 500;
-}
-
-.titleInput:focus {
-  color: #111827;
-}
-
-.metaActions {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.newBtn {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #6b7280;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.35rem 0.75rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
-  min-height: 36px;
-}
-
-.newBtn:hover {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.saveBtn {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #fff;
-  background: #1a56db;
-  border: none;
-  border-radius: 6px;
-  padding: 0.35rem 0.85rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s;
-  min-height: 36px;
-}
-
-.saveBtn:hover {
-  background: #1648c0;
-}
-
-.savedFeedback {
-  background: #059669 !important;
 }
 
 .metaFields {
