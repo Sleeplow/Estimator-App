@@ -1,9 +1,9 @@
 /* ── Placeholder (auth loading) ─────────────────────────── */
 .placeholder {
-  width: 110px;
+  width: 36px;
   height: 36px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* ── Sign-in button ──────────────────────────────────────── */
@@ -41,23 +41,24 @@
   cursor: not-allowed;
 }
 
-.popupWarning {
-  font-size: 0.75rem;
-  color: #fde68a;
-  white-space: nowrap;
-}
-
 .googleIcon {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
 }
 
+.popupWarning {
+  font-size: 0.75rem;
+  color: #fde68a;
+  white-space: nowrap;
+}
+
 /* ── Logged-in section ───────────────────────────────────── */
 .userSection {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
+  position: relative;
 }
 
 /* Sync status dot */
@@ -67,7 +68,6 @@
   border-radius: 50%;
   flex-shrink: 0;
   transition: background-color 0.3s ease;
-  cursor: help;
 }
 
 .syncDot[data-status='idle']    { background: rgba(255, 255, 255, 0.35); }
@@ -83,60 +83,146 @@
   50%       { opacity: 0.3; }
 }
 
-/* Avatar */
-.avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
-  object-fit: cover;
-  flex-shrink: 0;
-  display: block;
-}
-
-/* First name */
-.displayName {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.92);
-  max-width: 90px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Sign-out button */
-.signOutBtn {
+/* Avatar button */
+.avatarBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
   border-radius: 50%;
-  color: rgba(255, 255, 255, 0.65);
+  padding: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.avatarBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.avatarBtn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Dropdown ────────────────────────────────────────────── */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.08);
+  min-width: 230px;
+  z-index: 200;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.dropdownOpen {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+}
+
+.dropdownAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid #e5e7eb;
+}
+
+.dropdownInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.dropdownName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdownEmail {
+  font-size: 0.78rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 0;
+}
+
+.signOutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  border-radius: 0 0 12px 12px;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
-  padding: 0;
-  flex-shrink: 0;
   font-family: inherit;
+  text-align: left;
 }
 
 .signOutBtn svg {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #6b7280;
+  transition: color 0.15s ease;
 }
 
 .signOutBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.signOutBtn:hover:not(:disabled) svg {
+  color: #dc2626;
 }
 
 .signOutBtn:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+  outline: 2px solid #1a56db;
+  outline-offset: -2px;
 }
 
 .signOutBtn:disabled {
@@ -144,12 +230,8 @@
   cursor: not-allowed;
 }
 
-/* ── Mobile adjustments ──────────────────────────────────── */
+/* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .displayName {
-    display: none;
-  }
-
   .signInBtn span {
     display: none;
   }
@@ -159,12 +241,22 @@
     padding: 0;
     justify-content: center;
   }
+
+  /* Dropdown anchors to right edge of screen on mobile */
+  .dropdown {
+    right: -0.5rem;
+    min-width: 200px;
+  }
 }
 
-/* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .syncDot[data-status='syncing'] {
     animation: none;
     opacity: 0.8;
+  }
+
+  .dropdown {
+    transition: opacity 0.15s ease;
+    transform: none;
   }
 }
