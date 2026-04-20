@@ -16,8 +16,8 @@ export default defineConfig({
         theme_color: '#1a56db',
         background_color: '#f9fafb',
         display: 'standalone',
-        scope: '/',
-        start_url: '/',
+        scope: '/Estimator-App/',
+        start_url: '/Estimator-App/',
         icons: [
           {
             src: 'favicon.svg',
