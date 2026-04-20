@@ -76,9 +76,12 @@ export function History() {
                     </div>
                   </div>
                   <div className={styles.cardFooter}>
-                    <span className={styles.cardDate}>
-                      Modifié le {formatDate(est.updatedAt)}
-                    </span>
+                    <div className={styles.cardDates}>
+                      <span className={styles.cardDate}>Créé le {formatDate(est.createdAt)}</span>
+                      {est.updatedAt !== est.createdAt && (
+                        <span className={styles.cardDate}>Modifié le {formatDate(est.updatedAt)}</span>
+                      )}
+                    </div>
                     <div className={styles.cardActions}>
                       <button
                         className={styles.loadBtn}
