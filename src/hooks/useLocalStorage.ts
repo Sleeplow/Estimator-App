@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, ReactNode, createElement } from 'react';
 import {
   AppData, CatalogTask, EstimationTask, SavedEstimation, CurrentEstimationMeta,
   DEFAULT_CATALOG, CURRENT_VERSION,
 } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import { loadFromFirestore, saveToFirestore, mergeAppData } from '../services/firestoreSync';
 
 const STORAGE_KEY = 'powerbi-estimator';
+const FIRESTORE_DEBOUNCE_MS = 1500;
 
 const defaultMeta: CurrentEstimationMeta = { title: '', client: '', description: '' };
 
@@ -70,7 +73,6 @@ function migrateData(raw: unknown): AppData {
   const stored = raw as Record<string, unknown>;
   const version = Number(stored.version ?? 0);
 
-  // v1 → catalog split
   if (version < 2) {
     const oldCats = Array.isArray(stored.taskCategories) ? stored.taskCategories : [];
     const catalog: CatalogTask[] = oldCats.length > 0
@@ -98,10 +100,42 @@ function migrateData(raw: unknown): AppData {
   };
 }
 
-export function useAppData() {
+// ── Context ──────────────────────────────────────────────────────────────────
+
+interface AppDataContextValue {
+  data: AppData;
+  isLoading: boolean;
+  effectiveRate: number;
+  updateHourlyRate: (rate: number) => void;
+  updateEstimationRate: (rate: number) => void;
+  resetEstimationRate: () => void;
+  addCatalogTask: (name: string, defaultHours: number) => void;
+  updateCatalogTask: (id: string, updates: Partial<Pick<CatalogTask, 'name' | 'defaultHours'>>) => void;
+  deleteCatalogTask: (id: string) => void;
+  addFromCatalog: (catalogTask: CatalogTask) => void;
+  addAdHocTask: (name: string, hours: number) => void;
+  updateEstimationHours: (id: string, hours: number) => void;
+  removeEstimationTask: (id: string) => void;
+  clearEstimation: () => void;
+  updateCurrentMeta: (updates: Partial<CurrentEstimationMeta>) => void;
+  saveEstimation: () => void;
+  loadEstimation: (id: string) => void;
+  deleteEstimation: (id: string) => void;
+  deleteAndClearEstimation: (id: string) => void;
+  newEstimation: () => void;
+}
+
+const AppDataContext = createContext<AppDataContextValue | null>(null);
+
+// ── Provider ─────────────────────────────────────────────────────────────────
+
+export function AppDataProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData>(defaultData);
   const [isLoading, setIsLoading] = useState(true);
+  const { user, setSyncStatus } = useAuth();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Load from localStorage on mount
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -113,19 +147,50 @@ export function useAppData() {
     }
   }, []);
 
+  // On login: sync with Firestore
+  useEffect(() => {
+    if (!user) return;
+
+    setSyncStatus('syncing');
+    loadFromFirestore(user.uid)
+      .then((cloudData) => {
+        setData((local) => {
+          const merged = cloudData ? mergeAppData(local, cloudData) : local;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          if (!cloudData) {
+            // First login: bootstrap cloud with local data
+            saveToFirestore(user.uid, local).catch(() => {});
+          }
+          return merged;
+        });
+        setSyncStatus('synced');
+      })
+      .catch(() => setSyncStatus('error'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
+
+  function scheduleFirestoreWrite(uid: string, next: AppData) {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSyncStatus('syncing');
+    debounceRef.current = setTimeout(() => {
+      saveToFirestore(uid, next)
+        .then(() => setSyncStatus('synced'))
+        .catch(() => setSyncStatus('error'));
+    }, FIRESTORE_DEBOUNCE_MS);
+  }
+
   function persist(next: AppData) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     setData(next);
+    if (user) scheduleFirestoreWrite(user.uid, next);
   }
 
   const effectiveRate = data.estimationRate ?? data.hourlyRate;
 
-  // ── Hourly rate (base — Config page) ────────────────────
   function updateHourlyRate(rate: number) {
     persist({ ...data, hourlyRate: Math.max(0, rate) });
   }
 
-  // ── Estimation rate override (Dashboard only) ────────────
   function updateEstimationRate(rate: number) {
     persist({ ...data, estimationRate: Math.max(0, rate) });
   }
@@ -136,7 +201,6 @@ export function useAppData() {
     persist(next);
   }
 
-  // ── Catalog ──────────────────────────────────────────────
   function addCatalogTask(name: string, defaultHours: number) {
     const task: CatalogTask = { id: generateId(), name: name.trim(), defaultHours: Math.max(0, defaultHours) };
     persist({ ...data, catalog: [...data.catalog, task] });
@@ -153,7 +217,6 @@ export function useAppData() {
     persist({ ...data, catalog, estimation });
   }
 
-  // ── Estimation tasks ─────────────────────────────────────
   function addFromCatalog(catalogTask: CatalogTask) {
     const task: EstimationTask = {
       id: generateId(),
@@ -188,12 +251,10 @@ export function useAppData() {
     persist({ ...data, estimation: [] });
   }
 
-  // ── Current estimation meta ──────────────────────────────
   function updateCurrentMeta(updates: Partial<CurrentEstimationMeta>) {
     persist({ ...data, currentEstimation: { ...data.currentEstimation, ...updates } });
   }
 
-  // ── History ──────────────────────────────────────────────
   function saveEstimation() {
     const now = new Date().toISOString();
     const title = data.currentEstimation.title.trim() || 'Sans titre';
@@ -281,7 +342,7 @@ export function useAppData() {
     });
   }
 
-  return {
+  const value: AppDataContextValue = {
     data,
     isLoading,
     effectiveRate,
@@ -303,4 +364,14 @@ export function useAppData() {
     deleteAndClearEstimation,
     newEstimation,
   };
+
+  return createElement(AppDataContext.Provider, { value }, children);
+}
+
+// ── Hook ─────────────────────────────────────────────────────────────────────
+
+export function useAppData(): AppDataContextValue {
+  const ctx = useContext(AppDataContext);
+  if (!ctx) throw new Error('useAppData must be used inside AppDataProvider');
+  return ctx;
 }

@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { AuthButton } from '../AuthButton/AuthButton';
 import styles from './Navigation.module.css';
 
 export function Navigation() {
@@ -38,6 +39,9 @@ export function Navigation() {
             </svg>
             Configuration
           </NavLink>
+        </div>
+        <div className={styles.authSection}>
+          <AuthButton />
         </div>
       </nav>
 

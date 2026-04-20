@@ -1,0 +1,164 @@
+/* ── Placeholder (auth loading) ─────────────────────────── */
+.placeholder {
+  width: 110px;
+  height: 36px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Sign-in button ──────────────────────────────────────── */
+.signInBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.9rem;
+  height: 36px;
+  min-width: 44px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 20px;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.signInBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.signInBtn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.signInBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.googleIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ── Logged-in section ───────────────────────────────────── */
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* Sync status dot */
+.syncDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background-color 0.3s ease;
+  cursor: help;
+}
+
+.syncDot[data-status='idle']    { background: rgba(255, 255, 255, 0.35); }
+.syncDot[data-status='syncing'] {
+  background: #fb923c;
+  animation: dotPulse 1s ease-in-out infinite;
+}
+.syncDot[data-status='synced']  { background: #4ade80; }
+.syncDot[data-status='error']   { background: #f87171; }
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Avatar */
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* First name */
+.displayName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sign-out button */
+.signOutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  padding: 0;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
+.signOutBtn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.signOutBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.signOutBtn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.signOutBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Mobile adjustments ──────────────────────────────────── */
+@media (max-width: 600px) {
+  .displayName {
+    display: none;
+  }
+
+  .signInBtn span {
+    display: none;
+  }
+
+  .signInBtn {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .syncDot[data-status='syncing'] {
+    animation: none;
+    opacity: 0.8;
+  }
+}
