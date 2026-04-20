@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: '/Estimator-App/',
+  base: '/',
   plugins: [
     react(),
     VitePWA({
@@ -16,8 +16,8 @@ export default defineConfig({
         theme_color: '#1a56db',
         background_color: '#f9fafb',
         display: 'standalone',
-        scope: '/Estimator-App/',
-        start_url: '/Estimator-App/',
+        scope: '/',
+        start_url: '/',
         icons: [
           {
             src: 'favicon.svg',
